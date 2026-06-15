@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#103024">
+<meta name="apple-mobile-web-app-title" content="Morgen">
+<title>Morgenroutine · Mobilität</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300&family=Public+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-0:#0b1f17; --bg-1:#103024; --bg-2:#1a4a36;
+    --ink:#eafff5; --ink-soft:#a9d8c4; --ink-faint:#6fa389;
+    --accent:#5fd39b; --accent-2:#cfe87f;
+    --line:rgba(95,211,155,.18); --card:rgba(255,255,255,.04);
+    --serif:'Fraunces', Georgia, 'Times New Roman', serif;
+    --sans:'Public Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --mono:'Space Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0; padding:0; height:100%;}
+  body{
+    font-family:var(--sans); color:var(--ink);
+    background:radial-gradient(120% 80% at 50% -10%, var(--bg-2) 0%, var(--bg-1) 44%, var(--bg-0) 100%);
+    background-attachment:fixed; min-height:100dvh; overflow-x:hidden;
+    -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+  }
+  .stars{position:fixed; inset:0; pointer-events:none; z-index:0; opacity:.5;}
+  .stars span{position:absolute; width:2px; height:2px; border-radius:50%; background:var(--ink-soft); opacity:0; animation:twinkle 6s ease-in-out infinite;}
+  @keyframes twinkle{0%,100%{opacity:0} 50%{opacity:.5}}
+
+  .app{position:relative; z-index:1; max-width:520px; margin:0 auto; padding:max(22px,env(safe-area-inset-top)) 22px max(28px,env(safe-area-inset-bottom));}
+
+  .screen{display:none; animation:fade .6s ease both;}
+  .screen.active{display:block;}
+  @keyframes fade{from{opacity:0; transform:translateY(8px)} to{opacity:1; transform:none}}
+
+  .brand{margin:14px 0 4px;}
+  .brand .mark{font-family:var(--mono); font-size:.72rem; letter-spacing:.32em; text-transform:uppercase; color:var(--accent); opacity:.85;}
+  .brand h1{font-family:var(--serif); font-weight:300; font-size:3.0rem; line-height:.98; margin:.18em 0 .1em; letter-spacing:-.01em;}
+  .brand h1 em{font-style:italic; color:var(--accent);}
+  .brand p{color:var(--ink-soft); font-weight:300; font-size:1rem; margin:.4em 0 0; max-width:34ch;}
+
+  .principle{margin:24px 0 8px; padding:16px 18px; border:1px solid var(--line); border-radius:16px; background:var(--card);}
+  .principle .k{font-family:var(--mono); font-size:.66rem; letter-spacing:.22em; text-transform:uppercase; color:var(--accent-2); opacity:.9;}
+  .principle p{margin:.5em 0 0; font-size:.92rem; color:var(--ink-soft); font-weight:300; line-height:1.5;}
+  .principle b{color:var(--ink); font-weight:500;}
+
+  .label{font-family:var(--mono); font-size:.66rem; letter-spacing:.24em; text-transform:uppercase; color:var(--ink-faint); margin:28px 2px 12px;}
+
+  .cards{display:flex; flex-direction:column; gap:14px;}
+  .card-s{position:relative; text-align:left; width:100%; cursor:pointer;
+    border:1px solid var(--line); border-radius:20px; padding:20px 20px 18px;
+    background:linear-gradient(160deg, rgba(95,211,155,.07), rgba(255,255,255,.02));
+    color:inherit; font-family:inherit; overflow:hidden; transition:transform .25s ease;}
+  .card-s:active{transform:scale(.985);}
+  .card-s::before{content:''; position:absolute; left:0; top:0; bottom:0; width:3px; background:var(--cardaccent,var(--accent)); opacity:.9;}
+  .card-s .num{position:absolute; right:18px; top:16px; font-family:var(--mono); font-size:.7rem; color:var(--ink-faint); letter-spacing:.1em;}
+  .card-s h3{font-family:var(--serif); font-weight:400; font-size:1.5rem; margin:0 0 2px; letter-spacing:-.01em;}
+  .card-s .focus{font-family:var(--mono); font-size:.62rem; letter-spacing:.2em; text-transform:uppercase; color:var(--cardaccent,var(--accent)); margin-bottom:9px;}
+  .card-s .desc{font-size:.88rem; color:var(--ink-soft); font-weight:300; line-height:1.5; max-width:42ch;}
+  .card-s .meta{display:flex; gap:16px; margin-top:13px; font-family:var(--mono); font-size:.68rem; color:var(--ink-faint); letter-spacing:.06em;}
+  .card-s .meta b{color:var(--ink-soft); font-weight:400;}
+
+  .toggles{display:flex; gap:10px; margin:22px 0 4px;}
+  .toggle{flex:1; display:flex; align-items:center; justify-content:space-between; gap:10px; padding:13px 15px; border:1px solid var(--line); border-radius:14px; background:var(--card); cursor:pointer;}
+  .toggle .tname{font-size:.84rem; color:var(--ink-soft);}
+  .switch{width:42px; height:24px; border-radius:20px; background:rgba(255,255,255,.1); position:relative; flex:0 0 auto; transition:background .25s;}
+  .switch::after{content:''; position:absolute; top:2px; left:2px; width:20px; height:20px; border-radius:50%; background:var(--ink-faint); transition:transform .25s, background .25s;}
+  .toggle.on .switch{background:rgba(95,211,155,.4);}
+  .toggle.on .switch::after{transform:translateX(18px); background:var(--accent);}
+
+  .foot{margin:26px 2px 6px; font-size:.74rem; color:var(--ink-faint); font-weight:300; line-height:1.6;}
+  .foot b{color:var(--ink-soft); font-weight:500;}
+
+  #practice .topbar{display:flex; align-items:center; justify-content:space-between; margin:8px 0 4px;}
+  .ghost{background:none; border:none; color:var(--ink-soft); font-family:var(--mono); font-size:.68rem; letter-spacing:.18em; text-transform:uppercase; padding:8px 4px; cursor:pointer;}
+  .ghost:active{color:var(--ink);}
+  .sesstitle{font-family:var(--mono); font-size:.66rem; letter-spacing:.2em; text-transform:uppercase; color:var(--accent); text-align:center;}
+
+  .progress-wrap{margin:14px 2px 0;}
+  .pbar{height:3px; border-radius:3px; background:rgba(255,255,255,.08); overflow:hidden;}
+  .pbar i{display:block; height:100%; width:0; background:linear-gradient(90deg,var(--accent),var(--accent-2)); transition:width .4s ease;}
+  .pcount{display:flex; justify-content:space-between; margin-top:8px; font-family:var(--mono); font-size:.64rem; letter-spacing:.1em; color:var(--ink-faint);}
+
+  .stage{display:flex; flex-direction:column; align-items:center; text-align:center; margin-top:20px;}
+  .phasekind{font-family:var(--mono); font-size:.64rem; letter-spacing:.26em; text-transform:uppercase; color:var(--accent-2); min-height:1em;}
+  .posename{font-family:var(--serif); font-weight:300; font-size:2.3rem; line-height:1.06; margin:.18em 0 .05em; letter-spacing:-.01em; min-height:1.1em;}
+  .side{display:inline-block; min-height:1.2em; font-family:var(--mono); font-size:.66rem; letter-spacing:.2em; text-transform:uppercase; color:var(--accent); padding:0 0 2px;}
+  .side:empty{min-height:0;}
+
+  .orb-wrap{position:relative; width:248px; height:248px; margin:16px 0 6px; display:flex; align-items:center; justify-content:center;}
+  .orb{position:absolute; inset:0; border-radius:50%;
+    background:radial-gradient(circle at 50% 42%, rgba(95,211,155,.40), rgba(207,232,127,.10) 55%, transparent 72%); filter:blur(2px);}
+  .orb-ring{position:absolute; inset:30px; border-radius:50%; border:1px solid var(--line);}
+  .breath{position:absolute; width:150px; height:150px; border-radius:50%;
+    background:radial-gradient(circle at 50% 45%, rgba(234,255,245,.16), rgba(95,211,155,.10) 60%, transparent 75%);
+    box-shadow:0 0 50px rgba(95,211,155,.22); transform:scale(.78);}
+  .breathing .breath{animation:breathe 10s ease-in-out infinite;}
+  @keyframes breathe{0%{transform:scale(.74); opacity:.7} 40%{transform:scale(1.08); opacity:1} 50%{transform:scale(1.08); opacity:1} 100%{transform:scale(.74); opacity:.7}}
+  .pulsing .breath{animation:pulse 4s ease-in-out infinite;}
+  @keyframes pulse{0%,100%{transform:scale(.84); opacity:.8} 50%{transform:scale(.96); opacity:1}}
+  .timer{position:relative; z-index:2; font-family:var(--mono); font-weight:400; font-size:2.6rem; letter-spacing:.02em; color:var(--ink);}
+  .timer.tick{color:var(--accent-2);}
+  .breathword{position:absolute; bottom:18px; left:0; right:0; z-index:2; font-family:var(--mono); font-size:.66rem; letter-spacing:.3em; text-transform:uppercase; color:var(--ink-faint); min-height:1em;}
+
+  .cue{margin:6px 22px 0; font-size:.96rem; font-weight:300; color:var(--ink-soft); line-height:1.55; max-width:40ch; min-height:3.6em;}
+
+  .controls{display:flex; align-items:center; justify-content:center; gap:22px; margin-top:24px;}
+  .cbtn{width:52px; height:52px; border-radius:50%; border:1px solid var(--line); background:var(--card); color:var(--ink-soft); cursor:pointer; display:flex; align-items:center; justify-content:center; transition:transform .2s;}
+  .cbtn:active{transform:scale(.92);}
+  .cbtn svg{width:20px; height:20px; fill:currentColor;}
+  .cbtn.main{width:74px; height:74px; border-color:var(--accent); color:var(--accent);}
+  .cbtn.main svg{width:26px; height:26px;}
+
+  #done{text-align:center; padding-top:14vh;}
+  #done .mark{font-family:var(--mono); font-size:.7rem; letter-spacing:.3em; text-transform:uppercase; color:var(--accent-2);}
+  #done h2{font-family:var(--serif); font-weight:300; font-size:2.6rem; margin:.3em 0 .2em;}
+  #done h2 em{font-style:italic; color:var(--accent);}
+  #done p{color:var(--ink-soft); font-weight:300; max-width:32ch; margin:.4em auto 2.4em; line-height:1.6;}
+  .btn-solid{display:inline-block; border:1px solid var(--accent); background:rgba(95,211,155,.10); color:var(--ink); font-family:var(--mono); font-size:.72rem; letter-spacing:.18em; text-transform:uppercase; padding:15px 30px; border-radius:40px; cursor:pointer;}
+  .btn-solid:active{transform:scale(.97);}
+
+  @media (prefers-reduced-motion: reduce){
+    .breathing .breath,.pulsing .breath{animation:none; transform:scale(.9);}
+    .stars span{animation:none; opacity:.3;} .screen{animation:none;}
+  }
+</style>
+</head>
+<body>
+<div class="stars" id="stars"></div>
+<div class="app">
+
+  <!-- MENÜ -->
+  <section class="screen active" id="menu">
+    <div class="brand">
+      <div class="mark">Morgenroutine · Mobilität</div>
+      <h1>Wach werden, <em>locker</em> bleiben.</h1>
+      <p>Zwei sanfte, dynamische Abfolgen gegen die Steifheit nach dem Schlaf — zur Abwechslung.</p>
+    </div>
+
+    <div class="principle">
+      <div class="k">Morgens gilt</div>
+      <p><b>Sanft und dynamisch</b> statt intensiver statischer Dehnung — direkt nach dem Aufstehen sind die Bandscheiben noch „aufgequollen". Und: <b>Regelmäßigkeit schlägt Perfektion</b>.</p>
+    </div>
+
+    <div class="label">Wähle deine Routine</div>
+    <div class="cards" id="cards"></div>
+
+    <div class="toggles">
+      <div class="toggle on" id="toggleSound"><span class="tname">Töne</span><span class="switch"></span></div>
+      <div class="toggle on" id="toggleBreath"><span class="tname">Atemführung</span><span class="switch"></span></div>
+    </div>
+
+    <div class="foot">
+      <b>Hinweis:</b> Alles im schmerzfreien Bereich, sanft in die Bewegungen hineingehen. Bei akuten Beschwerden an Rücken, Knie oder Schulter die betreffende Übung auslassen. Kein Ersatz für ärztlichen Rat.
+    </div>
+  </section>
+
+  <!-- PRACTICE -->
+  <section class="screen" id="practice">
+    <div class="topbar">
+      <button class="ghost" id="exitBtn">‹ Menü</button>
+      <div class="sesstitle" id="runTitle"></div>
+      <button class="ghost" id="muteBtn">Ton</button>
+    </div>
+
+    <div class="progress-wrap">
+      <div class="pbar"><i id="pbarFill"></i></div>
+      <div class="pcount"><span id="phaseLabel"></span><span id="totalLabel"></span></div>
+    </div>
+
+    <div class="stage">
+      <div class="phasekind" id="phaseKind"></div>
+      <div class="posename" id="poseName"></div>
+      <div class="side" id="poseSide"></div>
+
+      <div class="orb-wrap" id="orbWrap">
+        <div class="orb"></div>
+        <div class="orb-ring"></div>
+        <div class="breath" id="breath"></div>
+        <div class="timer" id="timer">0:00</div>
+        <div class="breathword" id="breathWord"></div>
+      </div>
+
+      <div class="cue" id="cue"></div>
+
+      <div class="controls">
+        <button class="cbtn" id="prevBtn" aria-label="Vorherige Übung"><svg viewBox="0 0 24 24"><path d="M6 5h2v14H6zm3.5 7L18 5v14z"/></svg></button>
+        <button class="cbtn main" id="playBtn" aria-label="Pause / Weiter"><svg id="playIcon" viewBox="0 0 24 24"><path d="M7 5h4v14H7zm6 0h4v14h-4z"/></svg></button>
+        <button class="cbtn" id="nextBtn" aria-label="Nächste Übung"><svg viewBox="0 0 24 24"><path d="M16 5h2v14h-2zM6 5l8.5 7L6 19z"/></svg></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- DONE -->
+  <section class="screen" id="done">
+    <div class="mark">Fertig</div>
+    <h2>Wach &amp; <em>beweglich</em>.</h2>
+    <p>Der Körper ist auf Temperatur. Der Tag kann kommen.</p>
+    <button class="btn-solid" id="backBtn">Zurück zum Menü</button>
+  </section>
+
+</div>
+
+<script>
+"use strict";
+
+const T = 10; // Übergang in Sekunden
+
+const ROUTINES = [
+  {
+    id:'boden', name:'Bodenfluss', accent:'#5fd39b',
+    focus:'Am Boden · ruhig',
+    desc:'Die klassische Abfolge: Wirbelsäule, Hüfte und Schultern am Boden mobilisieren.',
+    phases:[
+      {kind:'Atem', name:'Ankommen', dur:45, cue:'Steh oder sitz locker. Ein paar tiefe Atemzüge — wach werden, ohne Hetze.'},
+      {kind:'Übergang', dur:T, t:'Cat-Cow'},
+      {kind:'Übung', name:'Cat-Cow', dur:60, cue:'Vierfüßlerstand. Mit dem Einatmen den Rücken durchhängen lassen, mit dem Ausatmen runden. Langsam, mit dem Atem.'},
+      {kind:'Übergang', dur:T, t:'Cobra dynamisch'},
+      {kind:'Übung', name:'Cobra dynamisch', dur:45, cue:'Bauchlage, Hände unter den Schultern. Einatmen: Oberkörper hochdrücken, ausatmen: absenken. 8–12 Mal, Becken am Boden, Schultern weg von den Ohren. Nicht in die maximale Streckung ziehen.'},
+      {kind:'Übergang', dur:T, t:'World\u2019s Greatest Stretch links'},
+      {kind:'Übung', name:'World\u2019s Greatest Stretch', side:'Linke Seite', dur:60, cue:'Tiefer Ausfallschritt, linker Fuß vorn. Rechte Hand am Boden, linken Arm zur Decke aufdrehen. Blick folgt der Hand.'},
+      {kind:'Übergang', dur:T, t:'Half-Split links'},
+      {kind:'Übung', name:'Half-Split dynamisch', side:'Linke Seite', dur:45, cue:'Hinteres Knie absetzen, linkes Bein strecken, Hüfte zurückschieben — und wieder lösen. Rhythmisch rein und raus, 10–15 Mal. Sanft bleiben, nicht ziehen.'},
+      {kind:'Übergang', dur:T, t:'World\u2019s Greatest Stretch rechts', switch:true},
+      {kind:'Übung', name:'World\u2019s Greatest Stretch', side:'Rechte Seite', dur:60, cue:'Seitenwechsel: rechter Fuß vorn, linke Hand am Boden, rechten Arm aufdrehen.'},
+      {kind:'Übergang', dur:T, t:'Half-Split rechts'},
+      {kind:'Übung', name:'Half-Split dynamisch', side:'Rechte Seite', dur:45, cue:'Rechtes Bein strecken, Hüfte rhythmisch zurückschieben und wieder lösen, 10–15 Mal. Dehnung nur sanft in der Beinrückseite.'},
+      {kind:'Übergang', dur:T, t:'90/90-Hüftwechsel'},
+      {kind:'Übung', name:'90/90-Hüftwechsel', dur:90, cue:'Im Sitzen beide Knie im rechten Winkel von Seite zu Seite kippen. Fließend, möglichst ohne die Hände aufzustützen.'},
+      {kind:'Übergang', dur:T, t:'Tiefe Hocke'},
+      {kind:'Übung', name:'Tiefe Hocke', dur:60, cue:'Fersen am Boden, Brust aufrecht. Ruhig atmen, sanft hin- und herwippen. Bei Bedarf irgendwo festhalten.'},
+      {kind:'Übergang', dur:T, t:'Schultern & Nacken'},
+      {kind:'Übung', name:'Schultern & Nacken', dur:60, cue:'Große, langsame Armkreise rückwärts. Dann den Kopf sanft zu allen Seiten neigen — nichts erzwingen.'},
+      {kind:'Übergang', dur:T, t:'Hängen / Wand-Stretch'},
+      {kind:'Übung', name:'Hängen / Wand-Stretch', dur:60, cue:'An einer Stange aushängen — oder Hände an die Wand, Brustkorb durchsinken lassen. Wirbelsäule lang werden lassen.'},
+      {kind:'Übergang', dur:T, t:'Schattenboxen'},
+      {kind:'Übung', name:'Schattenboxen', dur:30, cue:'Locker auswackeln: leichte Jabs, Footwork, Schultern lösen. Wach werden!'},
+      {kind:'Übergang', dur:T, t:'Ausklang'},
+      {kind:'Atem', name:'Ausklang', dur:45, cue:'Kurz nachspüren, ein paar ruhige Atemzüge. Der Körper ist wach und beweglich.'}
+    ]
+  },
+  {
+    id:'stehend', name:'Aufrecht & Fließend', accent:'#cfe87f',
+    focus:'Im Stehen · schwungvoll',
+    desc:'Eine stehende, fließende Variante mit Schwüngen und Walkouts — andere Bewegungen, gleiche Wirkung.',
+    phases:[
+      {kind:'Atem', name:'Ankommen', dur:45, cue:'Aufrecht stehen, Füße hüftbreit. Ein paar tiefe Atemzüge, Schultern locker fallen lassen.'},
+      {kind:'Übergang', dur:T, t:'Wirbelsäule entrollen'},
+      {kind:'Übung', name:'Wirbelsäule entrollen', dur:60, cue:'Langsam Wirbel für Wirbel nach unten abrollen, Kopf und Arme hängen lassen — dann ebenso langsam wieder aufrollen. Knie weich, mit dem Atem.'},
+      {kind:'Übergang', dur:T, t:'Stehende Streckung'},
+      {kind:'Übung', name:'Stehende Streckung', dur:45, cue:'Arme lang nach oben, zur Decke wachsen. Mit dem Einatmen sanfte Rückneigung, mit dem Ausatmen lösen. Brustkorb öffnen — nicht überstrecken.'},
+      {kind:'Übergang', dur:T, t:'Ausfallschritt + Drehung links'},
+      {kind:'Übung', name:'Ausfallschritt + Drehung', side:'Linke Seite', dur:50, cue:'Großer Ausfallschritt, linker Fuß vorn. Rechte Hand innen ab, linken Arm mit Drehung zur Decke öffnen. Ein paar Mal dynamisch auf- und zudrehen.'},
+      {kind:'Übergang', dur:T, t:'Ausfallschritt + Drehung rechts', switch:true},
+      {kind:'Übung', name:'Ausfallschritt + Drehung', side:'Rechte Seite', dur:50, cue:'Seitenwechsel: rechter Fuß vorn, rechten Arm zur Decke aufdrehen.'},
+      {kind:'Übergang', dur:T, t:'Beinpendel'},
+      {kind:'Übung', name:'Beinpendel', dur:60, cue:'An der Wand abstützen. Ein Bein locker vor und zurück schwingen, ~10 Mal, dann seitlich ein und aus. Nach der Hälfte das Bein wechseln. Hüfte locker.'},
+      {kind:'Übergang', dur:T, t:'Hüftkreisen'},
+      {kind:'Übung', name:'Hüftkreisen im Stand', dur:45, cue:'Hände in die Hüften, große langsame Kreise mit dem Becken — eine Richtung, dann die andere.'},
+      {kind:'Übergang', dur:T, t:'Inchworm / Walkout'},
+      {kind:'Übung', name:'Inchworm / Walkout', dur:60, cue:'Aus dem Stand vorbeugen, mit den Händen nach vorn bis in den Stütz wandern, Brust kurz sanft öffnen, zurückwandern und aufrollen. 4–6 Mal.'},
+      {kind:'Übergang', dur:T, t:'Schulterkreise & Brustöffner'},
+      {kind:'Übung', name:'Schulterkreise & Brustöffner', dur:55, cue:'Große, langsame Armkreise rückwärts. Dann Hände hinter dem Rücken locker fassen, Brustkorb öffnen, Schulterblätter zusammenführen.'},
+      {kind:'Übergang', dur:T, t:'Sprunggelenke & Waden'},
+      {kind:'Übung', name:'Sprunggelenke & Waden', dur:45, cue:'Auf die Zehenspitzen und wieder ab, einige Male. Dann die Knöchel einzeln langsam kreisen. Sprunggelenke und Waden wecken.'},
+      {kind:'Übergang', dur:T, t:'Sanftes Auslaufen'},
+      {kind:'Übung', name:'Sanftes Auslaufen', dur:30, cue:'Locker auf der Stelle marschieren oder leicht hüpfen, Arme ausschütteln. Wach werden!'},
+      {kind:'Übergang', dur:T, t:'Ausklang'},
+      {kind:'Atem', name:'Ausklang', dur:45, cue:'Kurz nachspüren, ein paar ruhige Atemzüge. Aufrecht, wach und beweglich in den Tag.'}
+    ]
+  }
+];
+
+let soundOn=true, breathOn=true;
+
+/* ---- Audio: die ursprünglichen schlichten Sinus-Beeps ---- */
+let actx=null;
+function beep(freq=660, dur=0.12){
+  if(!soundOn) return;
+  try{
+    if(!actx) actx=new (window.AudioContext||window.webkitAudioContext)();
+    if(actx.state==='suspended') actx.resume();
+    const ctx=actx, osc=ctx.createOscillator(), gain=ctx.createGain();
+    osc.frequency.value=freq; osc.type='sine';
+    gain.gain.setValueAtTime(0.0001, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.25, ctx.currentTime+0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime+dur);
+    osc.connect(gain).connect(ctx.destination);
+    osc.start(); osc.stop(ctx.currentTime+dur+0.05);
+  }catch(e){}
+}
+function unlockAudio(){ try{ if(!actx) actx=new (window.AudioContext||window.webkitAudioContext)(); if(actx.state==='suspended') actx.resume(); }catch(e){} }
+
+/* Wake Lock */
+let wakeLock=null;
+async function requestWake(){ try{ if('wakeLock' in navigator){ wakeLock=await navigator.wakeLock.request('screen'); } }catch(e){} }
+function releaseWake(){ try{ if(wakeLock){ wakeLock.release(); wakeLock=null; } }catch(e){} }
+document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible'&&running&&!paused){ requestWake(); } });
+
+/* Sterne */
+(function(){ const s=document.getElementById('stars'); for(let i=0;i<40;i++){ const d=document.createElement('span'); d.style.left=Math.random()*100+'%'; d.style.top=Math.random()*100+'%'; d.style.animationDelay=(Math.random()*6)+'s'; d.style.animationDuration=(4+Math.random()*5)+'s'; s.appendChild(d);} })();
+
+/* Menü-Karten */
+const cardsEl=document.getElementById('cards');
+ROUTINES.forEach((r,idx)=>{
+  const total=r.phases.reduce((a,p)=>a+p.dur,0);
+  const min=Math.round(total/60);
+  const ex=r.phases.filter(p=>p.kind==='Übung').length;
+  const b=document.createElement('button');
+  b.className='card-s'; b.style.setProperty('--cardaccent', r.accent);
+  b.innerHTML=`<span class="num">0${idx+1}</span>
+    <div class="focus">${r.focus}</div>
+    <h3>${r.name}</h3>
+    <div class="desc">${r.desc}</div>
+    <div class="meta"><span><b>~${min}</b> min</span><span><b>${ex}</b> Übungen</span><span>Ganzkörper</span></div>`;
+  b.addEventListener('click',()=>{ unlockAudio(); startRoutine(idx); });
+  cardsEl.appendChild(b);
+});
+
+/* Toggles */
+function bindToggle(id,get,set){ const el=document.getElementById(id); el.addEventListener('click',()=>{ const v=!get(); set(v); el.classList.toggle('on',v);}); }
+bindToggle('toggleSound',()=>soundOn,v=>soundOn=v);
+bindToggle('toggleBreath',()=>breathOn,v=>{breathOn=v; applyBreath();});
+
+function show(id){ document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); document.getElementById(id).classList.add('active'); window.scrollTo(0,0); }
+
+/* Engine */
+let routine=null, phases=[], phaseIdx=0, remaining=0, endAt=0, running=false, paused=false, ticker=null, lastTick=null;
+
+const el={
+  runTitle:document.getElementById('runTitle'),
+  phaseKind:document.getElementById('phaseKind'), poseName:document.getElementById('poseName'),
+  poseSide:document.getElementById('poseSide'), timer:document.getElementById('timer'),
+  cue:document.getElementById('cue'), pbar:document.getElementById('pbarFill'),
+  phaseLabel:document.getElementById('phaseLabel'), totalLabel:document.getElementById('totalLabel'),
+  breathWord:document.getElementById('breathWord'), orbWrap:document.getElementById('orbWrap'),
+  playIcon:document.getElementById('playIcon')
+};
+const ICON_PAUSE='<path d="M7 5h4v14H7zm6 0h4v14h-4z"/>', ICON_PLAY='<path d="M8 5v14l11-7z"/>';
+function fmt(s){ s=Math.max(0,Math.round(s)); return Math.floor(s/60)+':'+String(s%60).padStart(2,'0'); }
+
+function startRoutine(idx){
+  routine=ROUTINES[idx]; phases=routine.phases;
+  el.runTitle.textContent=routine.name;
+  document.documentElement.style.setProperty('--accent', routine.accent);
+  phaseIdx=0; running=true; paused=false;
+  show('practice'); requestWake(); loadPhase(0,true); setPlayIcon();
+}
+
+function loadPhase(i,isStart){
+  phaseIdx=i; const p=phases[i]; lastTick=null;
+  el.timer.classList.remove('tick');
+  el.phaseKind.textContent = p.kind==='Übergang'?'Übergang':p.kind;
+  el.poseName.textContent  = p.kind==='Übergang'?(p.t||''):p.name;
+  el.poseSide.textContent  = p.side||'';
+  el.cue.textContent       = p.kind==='Übergang'?('Wechsle: '+(p.t||'')):(p.cue||'');
+
+  const exTotal=phases.filter(x=>x.kind==='Übung').length;
+  const exDone=phases.slice(0,i+1).filter(x=>x.kind==='Übung').length;
+  if(p.kind==='Übung') el.phaseLabel.textContent='Übung '+exDone+' / '+exTotal;
+  else if(p.kind==='Übergang') el.phaseLabel.textContent='Übergang';
+  else el.phaseLabel.textContent=p.kind;
+
+  // Ton beim Phasenwechsel: 880 Hz rein in eine Übung, sonst 520 Hz
+  if(isStart) beep(520);
+  else beep(p.kind==='Übung' ? 880 : 520);
+
+  applyBreath();
+  remaining=p.dur; el.timer.textContent=fmt(remaining); setBar();
+  endAt=Date.now()+remaining*1000; startTicker();
+}
+
+function setBar(){
+  const total=phases.reduce((a,p)=>a+p.dur,0);
+  let done=phases.slice(0,phaseIdx).reduce((a,p)=>a+p.dur,0)+(phases[phaseIdx].dur-remaining);
+  el.pbar.style.width=Math.min(100,(done/total)*100)+'%';
+  el.totalLabel.textContent=fmt(total-done)+' übrig';
+}
+
+function startTicker(){
+  clearInterval(ticker);
+  ticker=setInterval(()=>{
+    if(paused) return;
+    remaining=(endAt-Date.now())/1000;
+    if(remaining<=3 && remaining>0){
+      const sec=Math.ceil(remaining);
+      if(sec!==lastTick){ lastTick=sec; beep(440,0.07); el.timer.classList.add('tick'); }
+    }
+    if(remaining<=0){ remaining=0; el.timer.textContent='0:00'; setBar(); advance(); return; }
+    el.timer.textContent=fmt(remaining); setBar();
+  },200);
+}
+
+function advance(){ if(phaseIdx<phases.length-1) loadPhase(phaseIdx+1,false); else finish(); }
+
+function applyBreath(){
+  const p=phases[phaseIdx];
+  el.orbWrap.classList.remove('breathing','pulsing');
+  if(paused){ el.breathWord.textContent=''; return; }
+  if(breathOn && p.kind==='Atem'){ el.orbWrap.classList.add('breathing'); el.breathWord.textContent='atmen'; }
+  else { el.orbWrap.classList.add('pulsing'); el.breathWord.textContent=''; }
+}
+
+function setPlayIcon(){ el.playIcon.innerHTML=paused?ICON_PLAY:ICON_PAUSE; }
+
+document.getElementById('playBtn').addEventListener('click',()=>{
+  unlockAudio(); paused=!paused;
+  if(paused){ clearInterval(ticker); releaseWake(); }
+  else { endAt=Date.now()+remaining*1000; startTicker(); requestWake(); }
+  applyBreath(); setPlayIcon();
+});
+document.getElementById('nextBtn').addEventListener('click',()=>{ unlockAudio(); if(phaseIdx<phases.length-1){ paused=false; setPlayIcon(); loadPhase(phaseIdx+1,false);} else finish(); });
+document.getElementById('prevBtn').addEventListener('click',()=>{ unlockAudio(); paused=false; setPlayIcon(); loadPhase(Math.max(0,phaseIdx-1), false); });
+document.getElementById('exitBtn').addEventListener('click',exitToMenu);
+document.getElementById('muteBtn').addEventListener('click',(e)=>{ soundOn=!soundOn; e.target.textContent=soundOn?'Ton':'Stumm'; document.getElementById('toggleSound').classList.toggle('on',soundOn); });
+document.getElementById('backBtn').addEventListener('click',exitToMenu);
+
+function exitToMenu(){ running=false; paused=false; clearInterval(ticker); releaseWake(); el.orbWrap.classList.remove('breathing','pulsing'); show('menu'); }
+function finish(){ running=false; clearInterval(ticker); releaseWake(); beep(880,0.35); el.orbWrap.classList.remove('breathing','pulsing'); show('done'); }
+</script>
+</body>
+</html>
